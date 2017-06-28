@@ -186,12 +186,6 @@ public class ExpandableLayout extends LinearLayout {
         verticalAnimate(mExpandedViewHeight,0);
     }
 
-    @Override
-    public boolean performClick() {
-        toggle();
-        return super.performClick();
-    }
-
     public interface OnExpandListener {
         void onExpand(boolean expanded) ;
     }
