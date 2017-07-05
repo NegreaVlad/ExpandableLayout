@@ -13,7 +13,7 @@ import android.widget.AbsListView;
 
 class Utils {
 
-     static ScrolledParent getScrolledParent (ViewGroup child) {
+    static ScrolledParent getScrolledParent (ViewGroup child) {
 
         ViewParent parent= child.getParent();
         int childBetweenParentCount =0;
@@ -48,8 +48,4 @@ class Utils {
 
         return  parentAnimator;
     }
-
-
-
-
 }
