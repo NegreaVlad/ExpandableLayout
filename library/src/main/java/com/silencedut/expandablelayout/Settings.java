@@ -9,4 +9,5 @@ public class Settings {
      int expandDuration = EXPAND_DURATION;
      boolean expandWithParentScroll;
      boolean expandScrollTogether;
+     boolean dynamicHeight;
 }

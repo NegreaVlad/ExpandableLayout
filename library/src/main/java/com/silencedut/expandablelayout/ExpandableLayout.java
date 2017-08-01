@@ -11,9 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
-
 /**
  * Created by SilenceDut on 16/6/6.
  */
@@ -59,6 +56,7 @@ public class ExpandableLayout extends LinearLayout {
             mSettings.expandDuration = typedArray.getInt(R.styleable.ExpandableLayout_expDuration, Settings.EXPAND_DURATION);
             mSettings.expandWithParentScroll = typedArray.getBoolean(R.styleable.ExpandableLayout_expWithParentScroll, false);
             mSettings.expandScrollTogether = typedArray.getBoolean(R.styleable.ExpandableLayout_expExpandScrollTogether, true);
+            mSettings.dynamicHeight = typedArray.getBoolean(R.styleable.ExpandableLayout_dynamicHeight, false);
             typedArray.recycle();
         }
     }
@@ -67,7 +65,7 @@ public class ExpandableLayout extends LinearLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int childCount = getChildCount();
-        LinearLayout expansionLayout = (LinearLayout) getChildAt(1);
+        ViewGroup expansionLayout = (ViewGroup) getChildAt(1);
 
         if (childCount != 2) {
             throw new IllegalStateException("ExpandableLayout must has two child view !");
@@ -82,7 +80,7 @@ public class ExpandableLayout extends LinearLayout {
             mIsInit = false;
             mExpandState = ExpandState.CLOSED;
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        } else {
+        } else if (mSettings.dynamicHeight) {
             int widthSpec = MeasureSpec.makeMeasureSpec(expansionLayout.getWidth(), MeasureSpec.EXACTLY);
             int heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             expansionLayout.measure(widthSpec, heightSpec);
@@ -124,13 +122,7 @@ public class ExpandableLayout extends LinearLayout {
         mExpandAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int layoutHeight = (int) animation.getAnimatedValue();
-
-                if ((int) animation.getAnimatedValue() == endHeight) {
-                    layoutHeight = endHeight == 0 ? 0 : WRAP_CONTENT;
-                }
-
-                target.getLayoutParams().height = layoutHeight;
+                target.getLayoutParams().height = (int) animation.getAnimatedValue();
                 target.requestLayout();
             }
         });
@@ -146,6 +138,9 @@ public class ExpandableLayout extends LinearLayout {
                     }
                 } else {
                     mExpandState = ExpandState.EXPANDED;
+                    ViewGroup.LayoutParams layoutparams = target.getLayoutParams();
+                    layoutparams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+
                     if (mOnExpandListener != null) {
                         mOnExpandListener.onExpand(true);
                     }
@@ -200,6 +195,12 @@ public class ExpandableLayout extends LinearLayout {
 
     public void close() {
         verticalAnimate(mExpandedViewHeight, 0);
+    }
+
+    @Override
+    public boolean performClick() {
+        toggle();
+        return super.performClick();
     }
 
     public void setOnExpandListener(OnExpandListener onExpandListener) {
